@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกรายรับ-รายจ่าย ร้านน้ำปั่น</title>
+    <!-- นำเข้าฟอนต์ภาษาไทย 'Prompt' เพื่อความสวยงาม -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* การตกแต่งความสวยงาม (CSS) */
+        :root {
+            --primary-color: #ff7e67; /* สีส้มสดใส */
+            --secondary-color: #00c9a7; /* สีเขียวมิ้นต์ */
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+        }
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Prompt', sans-serif;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 5px rgba(0, 201, 167, 0.3);
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            font-family: 'Prompt', sans-serif;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #ff6045;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        /* ข้อความแจ้งเตือน */
+        #message {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 500;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>🍹 บันทึกรายรับ-รายจ่าย</h2>
+        
+        <!-- กำหนด id ให้ฟอร์มสำหรับดึงข้อมูลด้วย JavaScript -->
+        <form id="recordForm">
+            <div class="form-group">
+                <label>วันที่:</label>
+                <input type="date" name="Date" id="dateInput" required>
+            </div>
+
+            <div class="form-group">
+                <label>ประเภทรายการ:</label>
+                <select name="Transaction_Type" required>
+                    <option value="รายรับ">รายรับ (ยอดขาย)</option>
+                    <option value="รายจ่าย">รายจ่าย (ต้นทุน/ค่าใช้จ่าย)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>หมวดหมู่:</label>
+                <select name="Category" required>
+                    <option value="" disabled selected>-- เลือกหมวดหมู่ --</option>
+                    <option value="ขายเครื่องดื่ม">ขายเครื่องดื่ม</option>
+                    <option value="วัตถุดิบ (ผลไม้/น้ำเชื่อม)">วัตถุดิบ (ผลไม้/น้ำเชื่อม)</option>
+                    <option value="บรรจุภัณฑ์ (แก้ว/หลอด)">บรรจุภัณฑ์ (แก้ว/หลอด)</option>
+                    <option value="ค่าเช่า/ค่าน้ำ/ค่าไฟ">ค่าเช่า/ค่าน้ำ/ค่าไฟ</option>
+                    <option value="อื่นๆ">อื่นๆ</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>รายละเอียด (เช่น แตงโมปั่น):</label>
+                <input type="text" name="Description" placeholder="ใส่รายละเอียดเพิ่มเติม..." required>
+            </div>
+
+            <div class="form-group">
+                <label>จำนวนเงิน (บาท):</label>
+                <input type="number" name="Amount" step="0.5" placeholder="0.00" required>
+            </div>
+
+            <div class="form-group">
+                <label>ช่องทางชำระเงิน:</label>
+                <select name="Payment_Method" required>
+                    <option value="เงินสด">💵 เงินสด</option>
+                    <option value="โอนเงิน">📱 โอนเงิน (สแกนจ่าย)</option>
+                    <option value="แอปเดลิเวอรี่">🛵 แอปเดลิเวอรี่</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>หมายเหตุ:</label>
+                <textarea name="Notes" rows="2" placeholder="ใส่หมายเหตุ (ถ้ามี)"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn">💾 บันทึกข้อมูล</button>
+        </form>
+        
+        <!-- พื้นที่แสดงข้อความเมื่อบันทึกสำเร็จหรือผิดพลาด -->
+        <div id="message"></div>
+    </div>
+
+    <script>
+        // === ส่วนของการตั้งค่าและการทำงานของ JavaScript ===
+        
+        // 1. นำ URL ที่ได้จากการ Deploy Google Apps Script มาวางที่นี่
+        const SCRIPT_URL = 'วาง_ของ_GOOGLE_APPS_SCRIPT_ที่นี่';
+        
+        const form = document.getElementById('recordForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageDiv = document.getElementById('message');
+
+        // ตั้งค่าให้ช่องวันที่ แสดงค่าเริ่มต้นเป็นวันที่ของวันนี้
+        document.getElementById('dateInput').valueAsDate = new Date();
+
+        // เมื่อมีการกดปุ่ม "บันทึกข้อมูล"
+        form.addEventListener('submit', e => {
+            e.preventDefault(); // ป้องกันไม่ให้หน้าเว็บรีเฟรช
+            
+            // เปลี่ยนสถานะปุ่มเพื่อแจ้งให้ผู้ใช้รอ
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ กำลังบันทึกข้อมูล...';
+            messageDiv.style.display = 'none';
+
+            // รวบรวมข้อมูลจากฟอร์ม
+            let requestBody = new FormData(form);
+
+            // ส่งข้อมูลไปยัง Google Apps Script
+            fetch(SCRIPT_URL, { method: 'POST', body: requestBody })
+                .then(response => {
+                    // เมื่อบันทึกสำเร็จ
+                    messageDiv.textContent = '✅ บันทึกข้อมูลเรียบร้อยแล้ว!';
+                    messageDiv.style.color = 'green';
+                    messageDiv.style.display = 'block';
+                    form.reset(); // ล้างฟอร์ม
+                    document.getElementById('dateInput').valueAsDate = new Date(); // คืนค่าวั้นที่ปัจจุบันกลับมา
+                })
+                .catch(error => {
+                    // เมื่อเกิดข้อผิดพลาด
+                    console.error('Error!', error.message);
+                    messageDiv.textContent = '❌ เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+                    messageDiv.style.color = 'red';
+                    messageDiv.style.display = 'block';
+                })
+                .finally(() => {
+                    // คืนสถานะปุ่มกลับมาให้กดใหม่ได้
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '💾 บันทึกข้อมูล';
+                });
+        });
+    </script>
+</body>
+</html>
